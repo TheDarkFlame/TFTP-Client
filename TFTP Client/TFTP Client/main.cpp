@@ -1,10 +1,16 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
-#include <cstdio>
+#include <iostream>
+#include <string>
 
 #pragma comment(lib, "Ws2_32.lib")
+using namespace std;
 
-int main(int argc, char *argv[]) {
+void getUserInput(string &, string &, string &);
+
+int main() {
+	string remoteHost, localFile, remoteFile;
+	getUserInput(remoteHost, localFile, remoteFile);
 	//initialize winsock2
 	WSADATA wsdata;
 	int iResult;
@@ -27,7 +33,7 @@ int main(int argc, char *argv[]) {
 #define DEFAULT_PORT "69"				//set port to find on server-side to be port 69
 
 										//resolve server addr and port
-	iResult = getaddrinfo(argv[1], DEFAULT_PORT, &hints, &result);
+	iResult = getaddrinfo(remoteHost.c_str(), DEFAULT_PORT, &hints, &result);//argv[1] is the host address (remote host we want to connect to)
 	if (iResult != 0) {
 		printf("getaddrinfo failed: %d\n", iResult);
 		WSACleanup();
@@ -36,3 +42,12 @@ int main(int argc, char *argv[]) {
 
 	return 0;
 }
+
+void getUserInput(string & remoteHost, string & localFileName, string & remoteFileName) {
+	cout << "enter the remote IP" << endl;
+	cin >> remoteHost;
+	cout << "enter the name of the file to download" << endl;
+	cin >> remoteFileName;
+	cout << "enter the name of the file you wish to save it as" << endl;
+	cin >> localFileName;
+};
