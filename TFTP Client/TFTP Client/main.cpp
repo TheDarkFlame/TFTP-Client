@@ -2,6 +2,7 @@
 #include <WS2tcpip.h>
 #include <iostream>
 #include <string>
+#include <io.h>
 
 #pragma comment(lib, "Ws2_32.lib")
 using namespace std;
@@ -15,10 +16,10 @@ const byte OP_ACK = 4;
 const byte OP_ERROR = 5;
 
 int establishSocket(string, SOCKET &);
-BYTE * createRequest(const byte, const string, const string);
+char * createRequest(const byte, const string, const string);
 BYTE * createAcknowledgment(byte blockNumber[]);
 void getUserInput(string &, string &, string &);
-int tftpSend(SOCKET, char *);
+int tftpSend(SOCKET,const char *,int);
 
 
 
@@ -34,7 +35,9 @@ int main() {
 
 	//get input from user
 	string remoteHost, localFile, remoteFile;
-	getUserInput(remoteHost, localFile, remoteFile);
+	//getUserInput(remoteHost, localFile, remoteFile);
+	remoteHost = "192.168.1.75";
+	remoteFile = "hello.txt";
 
 	//establish socket
 	SOCKET UDPSocket = INVALID_SOCKET;
@@ -44,18 +47,27 @@ int main() {
 	}
 
 
-	///-----------------receiving/sending from here onward
-//	int recvbuflen = DEFAULT_BUFLEN;
-	char *sendbuf = "test";//generate a buffer here;
-//	char recvbuf[DEFAULT_BUFLEN];
+	//	int recvbuflen = DEFAULT_BUFLEN;
+	const char *sendbuf = createRequest(OP_RRQ, remoteFile, MODE);//generate a buffer here;
 
-	iResult = tftpSend(UDPSocket, sendbuf);
-	if (iResult != 0) {
-		return 1;
+	string filename = "hello.txt";
+	string opcode = "\x1";
+	char spacer = '\x0';
+	string mode = "octet";
+
+	string temp = spacer + opcode + filename + spacer + mode + spacer;
+	char * ctemp = (char*) temp.c_str();
+	ctemp[0] = '\x0';
+
+	//	char recvbuf[DEFAULT_BUFLEN];
+	//	system("pause");
+	for (int i = 0; i < 1; i++) {
+		iResult = tftpSend(UDPSocket, ctemp,temp.size()+1);
+		if (iResult != 0) {
+			return 1;
+		}
+		int usleep(250);
 	}
-
-
-
 	return 0;
 }
 
@@ -68,32 +80,33 @@ void getUserInput(string & remoteHost, string & localFileName, string & remoteFi
 	cin >> localFileName;
 };
 
-BYTE * createRequest(const byte opCode, const string fileName, const string mode)
+char * createRequest(const byte opCode, const string fileName, const string mode)
 {
 	byte zeroByte = 0;
-	int rrqByteLength = 2 + fileName.length() + 1 + mode.length() + 1;
-	byte *rrqByteArray = new byte(rrqByteLength);
+	int rrqCharLength = 2 + fileName.length() + 1 + mode.length() + 1;
+	char rrqCharArray[512] = { 0 };
 
 	int position = 0;
-	rrqByteArray[position] = zeroByte;
+	rrqCharArray[position] = char(zeroByte);
 	position++;
-	rrqByteArray[position] = opCode;
+	rrqCharArray[position] = char(opCode);
 	position++;
 	for (int i = 0; i < fileName.length(); i++)
 	{
-		rrqByteArray[position] = (byte)fileName[i];
+		rrqCharArray[position] = fileName[i];
 		position++;
 	}
-	rrqByteArray[position] = zeroByte;
+	rrqCharArray[position] = char(zeroByte);
 	position++;
 	for (int i = 0; i < mode.length(); i++)
 	{
-		rrqByteArray[position] = (byte)mode[i];
+		rrqCharArray[position] = mode[i];
 		position++;
 	}
-	rrqByteArray[position] = zeroByte;
+	rrqCharArray[position] = char(zeroByte);
+	position++;
 
-	return rrqByteArray;
+	return rrqCharArray;
 
 }
 
@@ -157,10 +170,9 @@ int establishSocket(string remoteHost, SOCKET & sock) {//returns 0 if no error a
 	return 0;
 }
 
-int tftpSend(SOCKET sendSocket, char * sendData) {
-
+int tftpSend(SOCKET sendSocket,const char * sendData,int datalen) {
 	int iResult;
-	iResult = send(sendSocket, sendData, (int)strlen(sendData), 0);
+	iResult = send(sendSocket, sendData, datalen, 0);
 	if (iResult == SOCKET_ERROR) {
 		printf("send failed : %d\n", WSAGetLastError());
 		closesocket(sendSocket);
