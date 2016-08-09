@@ -62,7 +62,7 @@ int main() {
 	//	char recvbuf[DEFAULT_BUFLEN];
 	//	system("pause");
 	for (int i = 0; i < 1; i++) {
-		iResult = tftpSend(UDPSocket, ctemp,temp.size()+1);
+		iResult = tftpSend(UDPSocket, ctemp,temp.size());
 		if (iResult != 0) {
 			return 1;
 		}
