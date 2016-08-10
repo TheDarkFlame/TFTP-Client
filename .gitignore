@@ -9,6 +9,8 @@
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+C:\Users\ahmadbk\Source\Repos\TFTP-Client\TFTP Client\TFTP Client.VC.db
+C:\Users\ahmadbk\Source\Repos\TFTP-Client\TFTP Client\TFTP Client.VC.db
 
 # Build results
 [Dd]ebug/
@@ -210,3 +212,5 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+/TFTP Client/TFTP Client.VC.db
+/TFTP Client/TFTP Client.VC.VC.opendb
